@@ -120,7 +120,7 @@ So from any layer, tapping either `ESC` or `CMP` gets you home.
          │  1  │  2  │  3  │  4  │  5  │   │  6  │  7  │  8  │  9  │  0  │
          ├─────┼─────┼─────┼─────┼─────┤   ├─────┼─────┼─────┼─────┼─────┤
          │ ESC │ INS │ DEL │ TAB │ BSP │   │  ←  │  ↓  │  ↑  │  →  │ ENT │
-         │▾SFT │▾RALT│▾SYMB│▾CTL │▾ALT │   │▾ALT │▾CTL │▾SYMB│▾RALT│▾SFT │
+         │▾SFT │▾RALT│▾NPD │▾CTL │▾ALT │   │▾ALT │▾CTL │▾NPD │▾RALT│▾SFT │
     ┌────┼─────┼─────┼─────┼─────┼─────┤   ├─────┼─────┼─────┼─────┼─────┼────┐
     │    │  `  │  -  │  =  │  [  │  ]  │   │  \  │  '  │  ,  │  .  │  /  │    │
     │    │     │     │     │▾GUI │     │   │     │▾GUI │     │     │     │    │
@@ -134,9 +134,8 @@ So from any layer, tapping either `ESC` or `CMP` gets you home.
   modifier holds as BASE — hold `H` for Alt+Arrow, `J` for Ctrl+Arrow, etc.
 - Shifted symbols are reached by holding `A` (Shift) while tapping a
   number/bracket on this layer.
-- `D`/`K` are labelled `▾SYMB` here too: holding them re-triggers the SYMB
-  layer you're already on, which is a harmless no-op. (See *Known quirks*
-  below — on the Totem this position holds into NPAD instead.)
+- `D`/`K` hold into **NPAD**, matching the Totem's `▾NPD` — lets you jump
+  straight from SYMB into the numpad without returning to BASE first.
 
 ---
 
@@ -228,8 +227,8 @@ as on the Totem.
          ┌─────┬─────┬─────┬─────┬─────┐   ┌─────┬─────┬─────┬─────┬─────┐
          │  ·  │  ·  │  ·  │  ·  │  ·  │   │  ·  │  ·  │  ·  │  ·  │  ·  │
          ├─────┼─────┼─────┼─────┼─────┤   ├─────┼─────┼─────┼─────┼─────┤
-         │ MB5 │LCLK │MCLK │RCLK │ MB4 │   │ ◄   │ ▼   │ ▲   │ ►   │LCLK │
-         │(fwd)│     │     │     │(bck)│   │move │move │move │move │     │
+         │ MB4 │LCLK │MCLK │RCLK │ MB5 │   │ ◄   │ ▼   │ ▲   │ ►   │LCLK │
+         │(bck)│     │     │     │(fwd)│   │move │move │move │move │     │
     ┌────┼─────┼─────┼─────┼─────┼─────┤   ├─────┼─────┼─────┼─────┼─────┼────┐
     │    │  ·  │  ·  │  ·  │  ·  │  ·  │   │ ◄   │ ▼   │ ▲   │ ►   │  ·  │    │
     │    │     │     │     │     │     │   │scrl │scrl │scrl │scrl │     │    │
@@ -237,8 +236,6 @@ as on the Totem.
                         │  ▽  │BASE │  ▽  │   │  ▽  │  ▽  │BASE │
                         └─────┴─────┴─────┘   └─────┴─────┴─────┘
 ```
-
-⚠️ `A` and `G` are **mirrored versus the Totem** — see *Known quirks*.
 
 ---
 
@@ -408,22 +405,16 @@ double-tap description.
 ## Known quirks (Cheapino vs. Totem)
 
 These were found while cross-referencing the current `.vil` file against the
-Totem's rectified layout. None break basic typing; flagging them here so
-they're not mistaken for guide errors.
+Totem's rectified layout. Two earlier quirks (SYMB's `D`/`K` hold not
+reaching NPAD, and mirrored MOUS back/forward buttons) have since been
+fixed in the `.vil` and are no longer listed here.
 
-1. **SYMB's `D`/`K` hold re-triggers SYMB itself** instead of jumping to
-   NPAD the way the Totem's `▾NPD` does. Harmless (no-op since SYMB is
-   already active) but not quite the Totem's behavior.
-2. **MOUS layer's `A`/`G` mouse buttons are mirrored**: Cheapino has
-   `A`=forward(MB5)/`G`=back(MB4), while the Totem has `A`=back(MB4)/
-   `G`=forward(MB5).
-3. **The NAVI and SYST combos can't distinguish left vs. right `SPC`.**
+1. **The NAVI and SYST combos can't distinguish left vs. right `SPC`.**
    Vial matches combos by keycode, not physical position, and both thumb
    `SPC` keys share the identical `LGUI_T(KC_SPACE)` binding. So "right-SPC
    + BSP → NAVI" also fires from the left SPC, and "V+SPC"/"M+SPC" → SYST
    will accept either thumb too. Fixing this would require distinct
    keycodes (or QMK-level combo logic) rather than a `.vil`-only change.
 
-Let me know if you'd like any of these three corrected — 1 is a simple
-`.vil` edit; 2 is a one-line swap; 3 needs a firmware-level decision (it's
-not fixable purely in the Vial JSON).
+This one needs a firmware-level decision — it's not fixable purely in the
+Vial JSON.
