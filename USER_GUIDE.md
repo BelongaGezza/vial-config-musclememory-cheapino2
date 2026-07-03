@@ -164,15 +164,18 @@ hand while the right hand enters numbers.
                         └─────┴─────┴─────┘   └─────┴─────┴─────┘
 ```
 
-**Tap-dance operators** — ⚠️ **hold for secondary, not double-tap** (see
-*Known quirks*):
+**Tap-dance operators** — tap for primary, **hold** for secondary (this is
+the original ["muscle memory friendly" layout] design, not a Cheapino quirk —
+see *Design notes* below):
 
-| Key | Tap (primary) | Hold (secondary) |
-|-----|---------------|-------------------|
-| `-` | − minus | ÷ divide |
-| `+` | + plus | × multiply |
-| `.` | . decimal | , comma |
-| `0` | 0 | = equals |
+| Key | Tap (primary) | Hold (secondary) | Tap-then-hold |
+|-----|---------------|-------------------|----------------|
+| `-` | − minus | ÷ divide | repeats `-` |
+| `+` | + plus | × multiply | repeats `+` |
+| `.` | . decimal | , comma | repeats `.` |
+| `0` | 0 | = equals | repeats `0` |
+
+["muscle memory friendly" layout]: https://blog.getreu.net/20250826-muscle-memory-friendly-home-row-mods/
 
 Because the left side is transparent, `F`+`5` gives Ctrl+numpad-5, same idea
 as on the Totem.
@@ -353,8 +356,8 @@ F + 5        → hold F (Ctrl) + 5 = Ctrl+KP5
 CMP          → exit back to BASE
 ```
 
-Arithmetic secondary symbols (÷ × , =) are on **hold**, not double-tap —
-press and hold past the 200 ms tapping term to get the parenthesized symbol.
+Arithmetic secondary symbols (÷ × , =) are on **hold** — press and hold past
+the 200 ms tapping term to get them (this is by design, see *Design notes*).
 
 ### RGB / firmware maintenance
 
@@ -377,31 +380,50 @@ half for RGB or reset — release both thumbs to exit.
 
 ---
 
+## Design notes
+
+**NPAD arithmetic tap-dance is hold-based, not double-tap-based, on purpose.**
+`cheapino-agent-brief.md` (which drove the recent alignment work) describes
+the Totem's version as "tap once = primary, tap twice = secondary." But the
+underlying ["muscle memory friendly" layout] this whole keymap is built on —
+linked from this repo's own `README.md` — specifies it the other way:
+
+> Tapping sends the primary numpad key once. Holding sends the secondary
+> operator and keeps it active for auto-repeat. Tapping and then holding
+> repeats the primary numpad key.
+
+That's exactly what the `.vil`'s `tap_dance` entries for `-`/`+`/`.`/`0`
+already implement (`tap`=primary, `hold`=secondary, `tap_hold`=primary
+repeating), confirmed against Vial's own tap-dance field semantics
+(`On tap` / `On hold` / `On double tap` / `On tap+hold`, threshold set by
+`tapping_term`) in the [Vial manual]. So this is the original author's
+intended behavior, not a bug — it was **not** changed to match the brief's
+double-tap description.
+
+[Vial manual]: https://get.vial.today/manual/tap-dance.html
+["muscle memory friendly" layout]: https://blog.getreu.net/20250826-muscle-memory-friendly-home-row-mods/
+
+---
+
 ## Known quirks (Cheapino vs. Totem)
 
 These were found while cross-referencing the current `.vil` file against the
 Totem's rectified layout. None break basic typing; flagging them here so
 they're not mistaken for guide errors.
 
-1. **NPAD arithmetic operators fire on hold, not double-tap.** The brief
-   called for "tap once = primary, tap twice = secondary." The `.vil`'s
-   tap-dance entries instead put the secondary symbol on the *hold* slot and
-   leave the *double-tap* slot empty. This predates the recent keymap update
-   (it was already this way in the file before the last edit) — it wasn't
-   one of the seven items on the alignment checklist, so it was left as-is.
-2. **SYMB's `D`/`K` hold re-triggers SYMB itself** instead of jumping to
+1. **SYMB's `D`/`K` hold re-triggers SYMB itself** instead of jumping to
    NPAD the way the Totem's `▾NPD` does. Harmless (no-op since SYMB is
    already active) but not quite the Totem's behavior.
-3. **MOUS layer's `A`/`G` mouse buttons are mirrored**: Cheapino has
+2. **MOUS layer's `A`/`G` mouse buttons are mirrored**: Cheapino has
    `A`=forward(MB5)/`G`=back(MB4), while the Totem has `A`=back(MB4)/
    `G`=forward(MB5).
-4. **The NAVI and SYST combos can't distinguish left vs. right `SPC`.**
+3. **The NAVI and SYST combos can't distinguish left vs. right `SPC`.**
    Vial matches combos by keycode, not physical position, and both thumb
    `SPC` keys share the identical `LGUI_T(KC_SPACE)` binding. So "right-SPC
    + BSP → NAVI" also fires from the left SPC, and "V+SPC"/"M+SPC" → SYST
    will accept either thumb too. Fixing this would require distinct
    keycodes (or QMK-level combo logic) rather than a `.vil`-only change.
 
-Let me know if you'd like any of these four corrected — 1 and 2 are simple
-`.vil` edits; 3 is a one-line swap; 4 needs a firmware-level decision (it's
+Let me know if you'd like any of these three corrected — 1 is a simple
+`.vil` edit; 2 is a one-line swap; 3 needs a firmware-level decision (it's
 not fixable purely in the Vial JSON).
